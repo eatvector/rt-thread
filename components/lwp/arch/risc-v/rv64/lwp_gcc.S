@@ -83,13 +83,14 @@ arch_crt_start_umode:
 arch_ret_to_user:
     // TODO: we don't support kernel gdb server in risc-v yet
     // so we don't check debug state here and handle debugging bussiness
-
+    mv s0, a0
     call lwp_check_exit_request
     beqz a0, 1f
     mv a0, x0
     call sys_exit
 
 1:
+    beqz s0, ret_to_user_exit
     mv a0, sp
     call lwp_thread_signal_catch
 
@@ -119,6 +120,7 @@ arch_signal_quit:
 
     RESTORE_ALL
     SAVE_ALL
+    li a0, 0
     j arch_ret_to_user
 
 /**
@@ -284,6 +286,7 @@ arch_syscall_exit:
         LOAD s0, FRAME_OFF_SSTATUS(sp)
         andi s0, s0, 0x100
         bnez s0, dont_ret_to_user
+        li   a0, 1
         j arch_ret_to_user
     #endif
 dont_ret_to_user:

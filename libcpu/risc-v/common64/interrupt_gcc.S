@@ -80,6 +80,7 @@ _resume_execution:
     LOAD    t0, FRAME_OFF_SSTATUS(sp)
     andi    t0, t0, SSTATUS_SPP
     bnez    t0, _resume_kernel
+    li      a0, 1
     call arch_ret_to_user
 #endif
 
