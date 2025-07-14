@@ -81,6 +81,14 @@ arch_crt_start_umode:
  */
 .global arch_ret_to_user
 arch_ret_to_user:
+    li s0, 1   // flag=1 (normal path)
+    j arch_ret_to_user_impl
+
+.global arch_signal_quit_ret_to_user
+arch_signal_quit_ret_to_user:
+    li s0, 0   // flag=0 (signal exit path)
+
+arch_ret_to_user_impl:
     // TODO: we don't support kernel gdb server in risc-v yet
     // so we don't check debug state here and handle debugging bussiness
 
@@ -90,6 +98,8 @@ arch_ret_to_user:
     call sys_exit
 
 1:
+    // Skip signal handling if coming from arch_signal_quit_ret_to_user
+    beqz s0, ret_to_user_exit
     mv a0, sp
     call lwp_thread_signal_catch
 
@@ -119,7 +129,7 @@ arch_signal_quit:
 
     RESTORE_ALL
     SAVE_ALL
-    j arch_ret_to_user
+    j arch_signal_quit_ret_to_user
 
 /**
  * rt_noreturn
