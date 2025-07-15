@@ -27,6 +27,34 @@
 #include "sys/signal.h"
 #include "syscall_generic.h"
 
+void lwp_set_in_signal_quit(void)
+{
+    rt_thread_t thread = rt_thread_self();
+    
+    if (!thread->lwp) 
+    {
+        return;
+    }
+    
+    thread->signal.in_signal_quit = 1;
+}
+
+int lwp_clear_in_signal_quit(void)
+{
+    rt_thread_t thread = rt_thread_self();
+    int old_value;
+    
+    if (!thread->lwp)
+    {
+        return 0;
+    }
+    
+    old_value = thread->signal.in_signal_quit;
+    thread->signal.in_signal_quit = 0;
+    
+    return old_value;
+}
+
 rt_inline rt_err_t valid_signo_check(unsigned long sig)
 {
     return sig <= _LWP_NSIG ? 0 : -RT_EINVAL;
@@ -741,6 +769,11 @@ void lwp_thread_signal_catch(void *exp_frame)
     lwp_sigset_t *sig_mask;
     int retry_signal_catch;
     int signo;
+    
+    if (lwp_clear_in_signal_quit()) {
+        LOG_D("%s: skip signal catching (signal_quit cleared)", __func__);
+        return;
+    }
 
     thread = rt_thread_self();
     lwp = (struct rt_lwp *)thread->lwp;

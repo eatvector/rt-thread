@@ -833,6 +833,7 @@ typedef struct lwp_sigqueue {
 struct lwp_thread_signal {
     lwp_sigset_t sigset_mask;
     struct lwp_sigqueue sig_queue;
+    unsigned int in_signal_quit:1;
 };
 
 struct rt_user_context

@@ -79,6 +79,9 @@ void lwp_sighandler_set(int sig, lwp_sighandler_t func);
 void lwp_thread_sighandler_set(int sig, lwp_sighandler_t func);
 #endif
 
+void lwp_set_in_signal_quit(void);
+int lwp_clear_in_signal_quit(void);
+
 rt_inline void lwp_sigqueue_init(lwp_sigqueue_t sigq)
 {
     rt_memset(&sigq->sigset_pending, 0, sizeof(lwp_sigset_t));

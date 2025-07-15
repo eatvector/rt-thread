@@ -103,6 +103,8 @@ ret_to_user_exit:
  * And handle pending signals;
  */
 arch_signal_quit:
+    call lwp_set_in_signal_quit
+
     LOAD a0, FRAME_OFF_SP(sp)
     call arch_signal_ucontext_restore
 
